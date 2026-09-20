@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./attention/attention.css";
+import "./collabcy.css";
 
 export const metadata: Metadata = {
-  title: "GoHIGHnet — Creator & Brand Collaborations",
-  description: "Discover your next brand collaboration. Connect, negotiate, and create with GoHIGHnet.",
+  title: "CollabCy — Where influence meets opportunity",
+  description: "Find your people. Build your next collaboration. A shared home for independent creators, ambitious brands, and products worth discovering.",
   other: {
     "codex-preview": "development",
   },
   icons: {
-    icon: "/logo.PNG",
-    shortcut: "/logo.PNG",
+    icon: "/collabcy-mark.svg",
+    shortcut: "/collabcy-mark.svg",
   },
 };
 
