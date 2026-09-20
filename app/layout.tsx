@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./attention/attention.css";
 
 export const metadata: Metadata = {
   title: "GoHIGHnet — Creator & Brand Collaborations",

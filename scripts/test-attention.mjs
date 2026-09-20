@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+const out=mkdtempSync(join(tmpdir(),'gohighnet-attention-'));
+try{
+ const build=spawnSync(process.execPath,['node_modules/typescript/bin/tsc','app/attention/model.ts','app/attention/seed.ts','app/attention/repository.ts','--outDir',out,'--module','commonjs','--target','es2022','--skipLibCheck'],{encoding:'utf8'});
+ assert.equal(build.status,0,build.stdout+build.stderr);writeFileSync(join(out,'package.json'),'{"type":"commonjs"}');
+ const require=createRequire(import.meta.url),m=require(join(out,'model.js')),{createDemoState}=require(join(out,'seed.js')),{createMarketplaceRepository}=require(join(out,'repository.js'));
+ const now=Date.now(),seed=createDemoState(now),products=seed.products;
+ assert.equal(m.getRankedProducts(products,now).length,10);
+ assert.equal(m.getRankedProducts(products,now)[0].name,'Orbit AI');
+ assert.equal(m.getFilteredProducts(products,{query:'',category:'All',time:'48h'},now).length,8);
+ assert.equal(m.getFilteredProducts(products,{query:'finance',category:'All',time:'all'},now)[0].name,'Stakly');
+ assert.equal(m.getFilteredProducts(products,{query:'unfindable',category:'All',time:'all'},now).length,0);
+ assert.ok(m.getFilteredProducts(products,{query:'',category:'AI Tools',time:'all'},now).every(p=>p.category==='AI Tools'||p.tags.includes('AI Tools')));
+ assert.equal(m.getMinimumBidForPosition(products,'product-2',now),43);
+ assert.equal(m.getProjectedRank(products,43,'product-2',now),1);
+ assert.equal(m.getProjectedRank(products,42,'product-2',now),2);
+ for(const amount of [0,NaN,Infinity,38,40,42,43.5,100001])assert.ok(m.validateBid(products,'product-2',amount,now));
+ assert.equal(m.validateBid(products,'product-2',43,now),'');
+ assert.ok(m.validateBid(products,'product-archive',1000,now));
+ assert.equal(m.getRankedProducts(products,now+8*86400000).length,0);
+ assert.equal(m.safeWebsite('javascript:alert(1)'),null);assert.equal(m.safeWebsite('https://user:password@example.com'),null);
+ const storage=new Map();globalThis.localStorage={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
+ const repo=createMarketplaceRepository(seed);let notifications=0;const unsubscribe=repo.subscribe(()=>notifications++);
+ assert.throws(()=>repo.simulateBid('product-archive',500));assert.equal(notifications,0);
+ assert.equal(repo.simulateBid('product-2',45),1);assert.equal(notifications,1);assert.equal(repo.getProduct('framebase').currentBid,45);assert.equal(repo.getBidHistory('product-2')[0].amount,45);assert.equal(repo.getActivity()[0].rank,1);assert.equal(m.getRankedProducts(repo.getProducts())[0].name,'Framebase');
+ const visits=repo.getProduct('framebase').clickCount;repo.simulateVisit('product-2');assert.equal(repo.getProduct('framebase').clickCount,visits+1);
+ const input={brandId:'test',brandName:'Test Studio',name:'QA Product',logo:'Q',websiteUrl:'https://example.com',description:'A preview product.',category:'SaaS',initialBid:10};
+ const listed=repo.createProduct(input);assert.equal(listed.campaign,undefined);assert.equal(listed.listingEndsAt-listed.listingStartsAt,7*86400000);assert.equal(repo.getActivity()[0].type,'listing');assert.ok(m.getRankedProducts(repo.getProducts()).some(p=>p.id===listed.id));
+ assert.notEqual(repo.createProduct(input).slug,listed.slug);assert.throws(()=>repo.createProduct({...input,initialBid:0}));
+ const campaign={title:'Creator brief',description:'Try this tool',requirements:'An engaged audience',budget:100};assert.equal(repo.createProduct({...input,campaign}).campaign.budget,100);
+ const reloaded=createMarketplaceRepository();reloaded.initialize();assert.equal(reloaded.getProduct('framebase').currentBid,45);assert.equal(reloaded.getProduct(listed.slug).name,'QA Product');assert.equal(repo.getMarketplaceStats().activeProducts,13);unsubscribe();
+ console.log('PASS: ranking, ties, search, categories, time windows, validation, expiration, bid/activity updates, visit counts, optional campaigns, listing totals/duration, unique slugs, and persistence.');
+}finally{rmSync(out,{recursive:true,force:true});}
