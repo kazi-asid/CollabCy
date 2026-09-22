@@ -1,30 +1,80 @@
 export type Role='creator'|'brand';
 export type Campaign={id:string;brand:string;title:string;description:string;category:string;budget:number;maxBudget:number;platform:string;deliverable:string;color:string;letter:string;featured:boolean;days:number;status?:string;requirements?:string;applications?:number;created:number;expires:number;owner?:boolean;};
-const now=Date.now();
-export const samples:Campaign[]=[
-{id:'orbit',brand:'Orbit AI',title:'Make everyday work a little smarter.',description:'Show your audience how Orbit turns scattered notes into clear, actionable work. We’re looking for authentic creators who love discovering useful AI tools.',category:'AI & Technology',budget:100,maxBudget:250,platform:'X',deliverable:'1 post + 1 thread',color:'#e8edff',letter:'orbit',featured:true,days:6,applications:12,created:now-86400000,expires:now+6*86400000,requirements:'An engaged tech audience, 2,000+ followers, and an original product walkthrough. Include #ad and keep your post live for 30 days.'},
-{id:'stackly',brand:'Stackly',title:'Built for the way you create.',description:'Help independent creators discover their new favorite workspace. Share your workflow, your way, with an honest look at how you stay organized.',category:'Productivity',budget:75,maxBudget:150,platform:'Instagram',deliverable:'1 reel + 2 stories',color:'#e6f4ee',letter:'stack',featured:true,days:5,applications:8,created:now-2*86400000,expires:now+5*86400000},
-{id:'framebase',brand:'Framebase',title:'Big ideas deserve a beautiful home.',description:'Calling all design-minded creators. Introduce a simpler way to turn ideas into beautiful websites with a build-in-public tutorial.',category:'Design & Creative',budget:150,maxBudget:300,platform:'X',deliverable:'1 thread + demo',color:'#f0ebff',letter:'frame',featured:true,days:4,applications:19,created:now-3*86400000,expires:now+4*86400000},
-{id:'flowstate',brand:'Flowstate',title:'Less busywork. More flow.',description:'Create a short, honest walkthrough of our automation tool for founders and small teams. Show a real process you can simplify.',category:'Productivity',budget:50,maxBudget:100,platform:'X',deliverable:'1 sponsored post',color:'#e1f2fe',letter:'flow',featured:false,days:7,applications:6,created:now-3600000,expires:now+7*86400000},
-{id:'codepilot',brand:'Codepilot',title:'Your next coding companion.',description:'We’re looking for developers who love sharing useful tools. Take Codepilot for a spin and show your audience what you can build.',category:'AI & Technology',budget:100,maxBudget:200,platform:'X',deliverable:'1 product thread',color:'#eee7fc',letter:'code',featured:false,days:3,applications:15,created:now-4*86400000,expires:now+3*86400000},
-{id:'launchpad',brand:'Launchpad',title:'Give great launches a head start.',description:'Connect your founder audience with a better way to launch. Early-stage creators with an engaged community are welcome.',category:'Business & SaaS',budget:40,maxBudget:80,platform:'Facebook',deliverable:'1 sponsored post',color:'#fcebee',letter:'launch',featured:false,days:6,applications:4,created:now-7200000,expires:now+6*86400000},
-{id:'pocket',brand:'Pocket Studio',title:'Tell a story worth stopping for.',description:'Bring your next creative idea to life with our video editor. We’re looking for a quick before-and-after transformation.',category:'Design & Creative',budget:80,maxBudget:180,platform:'Instagram',deliverable:'1 reel',color:'#fff0dc',letter:'frame',featured:false,days:5,applications:10,created:now-3*3600000,expires:now+5*86400000},
-{id:'minute',brand:'Minute',title:'A little clarity for your day.',description:'Try our meeting assistant with your team and share what changed. Thoughtful reviews from productivity creators are a great fit.',category:'AI & Technology',budget:60,maxBudget:120,platform:'X',deliverable:'1 sponsored post',color:'#e5f2ed',letter:'orbit',featured:false,days:2,applications:9,created:now-5*86400000,expires:now+2*86400000}];
 export const categories=['All categories','AI & Technology','Productivity','Design & Creative','Business & SaaS'];
-export type Creator={id:string;name:string;handle:string;initials:string;bio:string;niche:string;platform:string;followers:number;impressions:number;rate:number;rating:number;reviews:number;available:boolean;color:string;location:string;engagement:number};
-export const creators:Creator[]=[
-{id:'maya',name:'Maya Chen',handle:'@mayamakes',initials:'MC',bio:'Making AI and productivity tools feel human. I turn complex products into stories my community actually cares about.',niche:'AI & Technology',platform:'X',followers:8400,impressions:42600,rate:120,rating:4.9,reviews:18,available:true,color:'#e7edff',location:'Singapore',engagement:5.2},
-{id:'arjun',name:'Arjun Mehta',handle:'@arjunbuilds',initials:'AM',bio:'Building in public. Sharing practical tools for indie founders and developers, one honest review at a time.',niche:'Business & SaaS',platform:'X',followers:5200,impressions:28100,rate:75,rating:4.8,reviews:12,available:true,color:'#e5f2ed',location:'India',engagement:4.6},
-{id:'sophia',name:'Sophia Williams',handle:'@designwithsoph',initials:'SW',bio:'Designer, storyteller, and a big believer in beautiful tools. Tutorials and creative workflows for curious people.',niche:'Design & Creative',platform:'Instagram',followers:12400,impressions:65200,rate:200,rating:5,reviews:24,available:true,color:'#f2e9ff',location:'United Kingdom',engagement:6.1},
-{id:'daniel',name:'Daniel Park',handle:'@danielinflow',initials:'DP',bio:'Helping small teams do their best work. Productivity experiments, thoughtful systems, and no-fluff recommendations.',niche:'Productivity',platform:'X',followers:4700,impressions:18900,rate:50,rating:4.9,reviews:9,available:true,color:'#fff0dc',location:'United States',engagement:3.8},
-{id:'aisha',name:'Aisha Rahman',handle:'@aishacreates',initials:'AR',bio:'Exploring the intersection of creativity and technology. Product stories, workflow reels, and useful discoveries.',niche:'AI & Technology',platform:'Instagram',followers:9200,impressions:51300,rate:150,rating:4.9,reviews:16,available:false,color:'#fde8ef',location:'Bangladesh',engagement:5.8},
-{id:'leo',name:'Leo Martinez',handle:'@leolabs',initials:'LM',bio:'Small business tools tested in real life. I help founders find the software that’s actually worth their time.',niche:'Business & SaaS',platform:'Facebook',followers:6100,impressions:25400,rate:85,rating:4.7,reviews:11,available:true,color:'#e1effa',location:'Spain',engagement:4.1}];
+export function campaignLetter(name:string){
+  const ch=(name||'').trim().charAt(0);
+  return /[a-z]/i.test(ch)?ch.toLowerCase():'c';
+}
+export type Creator={id:string;name:string;handle:string;initials:string;bio:string;niche:string;platform:string;followers:number;impressions:number;rate:number;rating:number;reviews:number;available:boolean;color:string;location:string;engagement:number;avatar?:string;platforms?:string[];website?:string;portfolio?:string[];};
+export type SocialAccount={id:string;platform:string;handle:string;url:string;followers:number;impressions:number;engagement:number;verified:boolean;};
 export type Profile={name:string;email:string;bio:string;handle:string;website:string;niche:string;platforms:string[];followers:number;impressions:number;rate:number;location:string;available:boolean;avatar?:string;portfolio:string[];};
-export type Deal={id:string;campaignId:string;title:string;partner:string;initials:string;color:string;price:number;status:'pending'|'negotiating'|'awaiting-funds'|'in-progress'|'in-review'|'revision'|'completed'|'declined'|'disputed';incoming:boolean;terms:string;deadline:string;delivery:string;messages:{id:string;body:string;mine:boolean;time:string}[];rating?:number;review?:string;};
-export type Notice={id:string;title:string;body:string;read:boolean;date:string};
-export type State={version:2;session:boolean;role:Role;onboarded:boolean;profile:Profile;profiles:Partial<Record<Role,Profile>>;saved:string[];shortlist:string[];deals:Deal[];brandDeals:Deal[];campaigns:Campaign[];plan:string;planUntil:number;notifications:Notice[];notifyEmail:boolean;notifyBrowser:boolean;billingCycle:'monthly'|'yearly';invoices:{id:string;label:string;amount:number;date:string}[];};
-export const blankProfile:Profile={name:'',email:'',bio:'',handle:'',website:'',niche:'AI & Technology',platforms:['X'],followers:0,impressions:0,rate:50,location:'',available:true,portfolio:[]};
-export function initialState():State{return {version:2,session:false,role:'creator',onboarded:false,profile:{...blankProfile},profiles:{},saved:[],shortlist:[],deals:[],brandDeals:[],campaigns:[],plan:'Free',planUntil:0,notifications:[],notifyEmail:true,notifyBrowser:false,billingCycle:'monthly',invoices:[]}}
-export function demoDeals(role:Role):Deal[]{return [{id:'demo-1',campaignId:'orbit',title:'Make everyday work a little smarter.',partner:role==='creator'?'Orbit AI':'Maya Chen',initials:role==='creator'?'O':'MC',color:'#e7edff',price:150,status:'in-progress',incoming:false,terms:'1 original X thread (5–7 posts) with a product walkthrough. Include #ad. One revision. Keep live for 30 days.',deadline:new Date(Date.now()+4*86400000).toISOString().slice(0,10),delivery:'',messages:[{id:'m1',body:'Your approach sounds like a great fit! We’d love a thread that shows a real workflow.',mine:role==='brand',time:'10:24 AM'},{id:'m2',body:'Absolutely. I’ll focus on turning meeting notes into an action plan. I can share a draft this week.',mine:role==='creator',time:'10:28 AM'}]},{id:'demo-2',campaignId:'stackly',title:'Built for the way you create.',partner:role==='creator'?'Stackly':'Arjun Mehta',initials:role==='creator'?'S':'AM',color:'#e5f2ed',price:100,status:'pending',incoming:true,terms:'1 sponsored post sharing your everyday workflow.',deadline:new Date(Date.now()+7*86400000).toISOString().slice(0,10),delivery:'',messages:[{id:'m3',body:'Hi! Your content really resonates with our community. Would you be interested in this collaboration?',mine:false,time:'Yesterday'}]},{id:'demo-3',campaignId:'flowstate',title:'Less busywork. More flow.',partner:role==='creator'?'Flowstate':'Daniel Park',initials:role==='creator'?'F':'DP',color:'#e1f2fe',price:80,status:'completed',incoming:false,terms:'1 original sponsored X post. One revision. Keep live for 30 days.',deadline:new Date().toISOString().slice(0,10),delivery:'https://x.com',messages:[{id:'m4',body:'Thanks for the thoughtful collaboration. Everything is approved!',mine:role==='brand',time:'Sep 12'}],rating:5,review:'Great communication and a thoughtful collaboration.'}]}
+export type DealStatus='pending'|'negotiating'|'awaiting-funds'|'in-progress'|'in-review'|'revision'|'completed'|'declined'|'disputed'|'active'|'submitted'|'revision_requested'|'cancelled'|'brand_verified'|'platform_review';
+export type Deal={id:string;campaignId:string;title:string;partner:string;initials:string;color:string;price:number;status:DealStatus;incoming:boolean;terms:string;deadline:string;delivery:string;messages:{id:string;body:string;mine:boolean;time:string}[];rating?:number;review?:string;kind?:'application'|'connection';handle?:string;avatar?:string;niche?:string;followers?:number;impressions?:number;createdAt?:number;updatedAt?:number;applicationStatus?:ApplicationStatus;connectionStatus?:ConnectionStatus;dealId?:string;dealStatus?:string;deliverable?:string;requirements?:string;submissionNote?:string;revisionNote?:string;};
+export type ApplicationStatus='pending'|'accepted'|'rejected'|'withdrawn';
+export type ConnectionStatus='active'|'closed';
+export type CampaignApplication={id:string;campaignId:string;campaignTitle:string;campaignBrand:string;campaignColor:string;creatorId:string;creatorName:string;creatorAvatar?:string;creatorHandle:string;creatorRate:number;creatorNiche:string;creatorFollowers:number;creatorImpressions:number;message:string;proposedRate:number;status:ApplicationStatus;created:number;initiatedBy:'creator'|'brand';};
+export type Connection={id:string;campaignId:string;applicationId?:string;brandId:string;creatorId:string;status:ConnectionStatus;created:number;campaignTitle:string;campaignBrand:string;campaignColor:string;partnerName:string;partnerHandle:string;partnerAvatar?:string;proposedRate:number;message:string;conversationId?:string;};
+export type NotificationType='new_message'|'application_received'|'application_accepted'|'application_rejected'|'connection_created'|'deal_submitted'|'deal_revision_requested'|'deal_completed'|'deal_cancelled'|'deal_brand_verified'|'deal_platform_verified'|'deal_platform_revision'|'deal_needs_verification'|'deal_disputed'|'deal_dispute_resolved';
+export type Notice={id:string;title:string;body:string;read:boolean;date:string;type?:NotificationType;conversationId?:string;connectionId?:string;messageId?:string;};
+export type Conversation={id:string;connectionId:string;campaignId:string;brandId:string;creatorId:string;campaignTitle:string;campaignBrand:string;campaignColor:string;partnerName:string;partnerHandle:string;partnerAvatar?:string;lastMessage?:string;lastMessageAt?:number;lastMessageSenderId?:string;unreadCount:number;closed:boolean;created:number;};
+export type ChatMessage={id:string;conversationId:string;senderId:string;body:string;mine:boolean;time:string;created:number;readAt?:number;fromPlatform?:boolean;};
+export type State={version:2;authUserId:string;session:boolean;role:Role;onboarded:boolean;profile:Profile;profiles:Partial<Record<Role,Profile>>;saved:string[];shortlist:string[];deals:Deal[];brandDeals:Deal[];workspaceDeals:import('./deals/model').CollaborationDeal[];campaigns:Campaign[];publishedCampaigns:Campaign[];directoryCreators:Creator[];socialAccounts:SocialAccount[];applications:CampaignApplication[];connections:Connection[];conversations:Conversation[];remoteWorkspace:boolean;platformVerifier:boolean;plan:string;planUntil:number;notifications:Notice[];notifyEmail:boolean;notifyBrowser:boolean;billingCycle:'monthly'|'yearly';invoices:{id:string;label:string;amount:number;date:string}[];};
+export const blankProfile:Profile={name:'',email:'',bio:'',handle:'',website:'',niche:'',platforms:[],followers:0,impressions:0,rate:0,location:'',available:true,portfolio:[]};
+export function initialState():State{return {version:2,authUserId:'',session:false,role:'creator',onboarded:false,profile:{...blankProfile},profiles:{},saved:[],shortlist:[],deals:[],brandDeals:[],workspaceDeals:[],campaigns:[],publishedCampaigns:[],directoryCreators:[],socialAccounts:[],applications:[],connections:[],conversations:[],remoteWorkspace:false,platformVerifier:false,plan:'Free',planUntil:0,notifications:[],notifyEmail:true,notifyBrowser:false,billingCycle:'monthly',invoices:[]}}
+export function roleConflictNotice(existing:Role){
+  if(existing==='brand')return {
+    title:"You’re already registered as a Brand.",
+    body:"This email is already registered as a Brand account. Please use a different email address for a Creator account.",
+  };
+  return {
+    title:"You’re already registered as a Creator.",
+    body:"This email is already registered as a Creator account. Please use a different email address for a Brand account.",
+  };
+}
+export function canonicalMarketplaceRole(profiles:{role:Role;created?:number}[]=[]):Role|null{
+  return [...profiles].sort((a,b)=>(a.created||0)-(b.created||0)||a.role.localeCompare(b.role))[0]?.role||null;
+}
+export function brandCanBrowseCreators(role:Role,campaigns:Pick<Campaign,'id'>[]=[]):boolean{
+  return role==='brand'&&campaigns.length>0;
+}
+export const CREATOR_USER_ID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export function isUuid(value:string){
+  return typeof value==='string'&&CREATOR_USER_ID.test(value);
+}
+export function isCreatorUserId(value:string){
+  return isUuid(value);
+}
+export function realDirectoryCreators(list:Creator[]=[]){
+  return list.filter(creator=>isCreatorUserId(creator.id));
+}
+export function brandCreatorRelationship(creatorId:string,applications:Pick<CampaignApplication,'creatorId'|'status'|'initiatedBy'|'id'|'campaignId'>[]=[],connections:Pick<Connection,'creatorId'|'status'|'id'|'campaignId'|'applicationId'>[]=[]){
+  const active=connections.find(c=>c.creatorId===creatorId&&c.status==='active');
+  if(active)return {kind:'connected' as const,connectionId:active.id,campaignId:active.campaignId};
+  const pending=applications.find(a=>a.creatorId===creatorId&&a.status==='pending');
+  if(pending)return {kind:'pending' as const,applicationId:pending.id,campaignId:pending.campaignId,initiatedBy:pending.initiatedBy};
+  const closed=connections.find(c=>c.creatorId===creatorId&&c.status==='closed');
+  if(closed)return {kind:'closed' as const,connectionId:closed.id,campaignId:closed.campaignId};
+  const rejected=applications.find(a=>a.creatorId===creatorId&&a.status==='rejected');
+  if(rejected)return {kind:'rejected' as const,applicationId:rejected.id,campaignId:rejected.campaignId};
+  return {kind:'none' as const};
+}
 export const money=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
 export const compact=(n:number)=>new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n);
+function initialsFrom(name:string){return name.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase()||'Y'}
+export function collaborationsFromMarketplace(role:Role,applications:CampaignApplication[],connections:Connection[],deals:import('./deals/model').CollaborationDeal[]=[]):Deal[]{
+  const connected=new Set(connections.map(c=>`${c.campaignId}:${c.creatorId}`));
+  const dealByConnection=new Map(deals.map(deal=>[deal.connectionId,deal]));
+  const fromApps=applications.filter(app=>app.status!=='accepted'||!connected.has(`${app.campaignId}:${app.creatorId}`)).map((app):Deal=>{
+    const partner=role==='brand'?app.creatorName:app.campaignBrand;
+    const incoming=app.initiatedBy==='brand'?role==='creator':role==='brand';
+    return {id:app.id,campaignId:app.campaignId,title:app.campaignTitle,partner,initials:initialsFrom(partner),color:app.campaignColor||'#e8edff',price:app.proposedRate,status:app.status==='pending'?'pending':'declined',incoming,terms:app.message,deadline:'',delivery:'',messages:app.message?[{id:'application',body:app.message,mine:app.initiatedBy==='brand'?role==='brand':role==='creator',time:new Date(app.created).toLocaleDateString('en-US',{month:'short',day:'numeric'})}]:[],kind:'application',handle:app.creatorHandle,avatar:role==='brand'?app.creatorAvatar:undefined,niche:app.creatorNiche,followers:app.creatorFollowers,impressions:app.creatorImpressions,createdAt:app.created,applicationStatus:app.status};
+  });
+  const fromConnections=connections.map((conn):Deal=>{
+    const deal=dealByConnection.get(conn.id);
+    const partner=role==='brand'?conn.partnerName:conn.campaignBrand;
+    const status:DealStatus=deal?deal.status:conn.status==='closed'?'completed':'in-progress';
+    const deadline=deal?.deadline&&Number.isFinite(Date.parse(deal.deadline))?new Date(Date.parse(deal.deadline)).toISOString().slice(0,10):'';
+    return {id:conn.id,campaignId:conn.campaignId,title:conn.campaignTitle,partner,initials:initialsFrom(partner),color:conn.campaignColor||'#e8edff',price:deal?.agreedBudget??conn.proposedRate,status,incoming:false,terms:deal?.requirements||deal?.deliverable||conn.message,deadline,delivery:deal?.submissionUrl||'',messages:conn.message?[{id:'connection',body:conn.message,mine:false,time:new Date(conn.created).toLocaleDateString('en-US',{month:'short',day:'numeric'})}]:[],kind:'connection',handle:conn.partnerHandle,avatar:role==='brand'?conn.partnerAvatar:undefined,createdAt:conn.created,updatedAt:deal?.updatedAt,connectionStatus:conn.status,dealId:deal?.id,dealStatus:deal?.status,deliverable:deal?.deliverable,requirements:deal?.requirements,submissionNote:deal?.submissionNote,revisionNote:deal?.revisionNote};
+  });
+  return [...fromApps,...fromConnections].sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
+}
