@@ -43,7 +43,7 @@ export function AudiencePulse(){
   const tickerItems=useMemo(()=>recentTickerItems(state.activity,state.products),[state.activity,state.products]);
   const [live,setLive]=useState<number|null>(null);
   const visits=useSiteVisits();
-  const [online,setOnline]=useState(false);
+
   useEffect(()=>{
     const tabId=crypto.randomUUID();
     let visitor:string;
@@ -75,7 +75,7 @@ export function AudiencePulse(){
       const count=Object.keys(channel.presenceState()).length;
       remoteLive=true;
       setLive(Math.max(1,count));
-      setOnline(true);
+
     };
     channel?.on('presence',{event:'sync'},syncLive)
       .on('presence',{event:'join'},syncLive)
@@ -84,7 +84,7 @@ export function AudiencePulse(){
         if(status==='SUBSCRIBED')void channel.track({tab:tabId,visitor,joinedAt:Date.now()});
         else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
           remoteLive=false;
-          setOnline(false);
+
           setLive(localCount());
         }
       });
@@ -108,8 +108,8 @@ export function AudiencePulse(){
     };
   },[]);
   return <div className="audience-pulse" aria-label="Marketplace audience">
-    <span className="audience-pulse-live"><i/><strong key={live}>{live===null?'—':live}</strong> live {online?'now':'here'}</span>
-    <span className="audience-pulse-visits" title={visits.trackingBeganAt?`Site visits since ${new Date(visits.trackingBeganAt).toLocaleDateString()}. One visit per browser-tab session.`:'Site-wide tracking must be enabled before a lifetime count is available.'}><ArrowUpRight size={14}/><strong>{visits.status==='ready'&&visits.total!==null?BigInt(visits.total).toLocaleString():'—'}</strong><span>total visits in CollabCy{visits.status!=='ready'&&<small>{visits.status==='loading'?'Loading…':'Currently unavailable'}</small>}</span></span>
+    <span className="audience-pulse-live"><i/><strong key={live}>{live===null?'—':live}</strong> Live</span>
+    <span className="audience-pulse-visits" title={visits.trackingBeganAt?`Site visits since ${new Date(visits.trackingBeganAt).toLocaleDateString()}. One visit per browser-tab session.`:'Site-wide tracking must be enabled before a lifetime count is available.'}><ArrowUpRight size={14}/><strong>{visits.status==='ready'&&visits.total!==null?BigInt(visits.total).toLocaleString():'—'}</strong><span className="audience-total-label">Total visits</span></span>
     <ActivityTicker items={tickerItems}/>
   </div>;
 }

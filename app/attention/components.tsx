@@ -88,9 +88,9 @@ export function ActivityList({events,limit=5}:{events:ActivityEvent[];limit?:num
   });
   return <ol className="attention-activity">{rows}{!rows.length&&<li className="activity-quiet"><span className="activity-quiet-mark"><TrendingUp size={18}/></span><strong>Quiet for now.</strong><small>New products and ranking changes will appear here.</small></li>}</ol>;
 }
-export function MarketDialog({open,onClose,title,description,children,returnFocusId}:{open:boolean;onClose:()=>void;title:string;description:string;children:ReactNode;returnFocusId?:string}){
+export function MarketDialog({open,onClose,title,description,children,returnFocusId,className=''}:{open:boolean;onClose:()=>void;title:string;description:string;children:ReactNode;returnFocusId?:string;className?:string}){
   const trigger=useRef<HTMLElement|null>(null);
-  return <Dialog open={open} onOpenChange={v=>!v&&onClose()}><DialogContent className="attention-dialog" onOpenAutoFocus={()=>{trigger.current=document.activeElement as HTMLElement;}} onCloseAutoFocus={e=>{const target=trigger.current?.isConnected?trigger.current:returnFocusId?document.getElementById(returnFocusId):null;if(target){e.preventDefault();target.focus();}}}><DialogTitle>{title}</DialogTitle><DialogDescription>{description}</DialogDescription>{children}</DialogContent></Dialog>;
+  return <Dialog open={open} onOpenChange={v=>!v&&onClose()}><DialogContent className={`attention-dialog ${className}`} onOpenAutoFocus={()=>{trigger.current=document.activeElement as HTMLElement;}} onCloseAutoFocus={e=>{const target=trigger.current?.isConnected?trigger.current:returnFocusId?document.getElementById(returnFocusId):null;if(target){e.preventDefault();target.focus();}}}><DialogTitle>{title}</DialogTitle><DialogDescription>{description}</DialogDescription>{children}</DialogContent></Dialog>;
 }
 export function VisitDialog({productId,onClose,onBid}:{productId:string|null;onClose:()=>void;onBid:(id:string)=>void}){
   const {state,repository}=useAttention();
@@ -103,7 +103,7 @@ export function ProductMetrics({product:p}:{product:Product}){
   return <div className="product-metrics"><div><strong>{money(p.currentBid)}</strong><small>Current bid</small></div><div><strong>{rank===1?'#1':rank?`#${rank-1}`:'Expired'}</strong><small>{rank===1?'Crown Jewel':'Regular leaderboard'}</small></div><div><strong key={p.clickCount}>{p.clickCount}</strong><small>Website clicks</small></div><div><strong>{timeAgo(p.bids[0]?.createdAt||p.listingStartsAt)}</strong><small>Last bid</small></div></div>;
 }
 export function BidDialog({productId,onClose,initialIncrement}:{productId:string|null;onClose:()=>void;initialIncrement?:number}){
-  const {state}=useAttention();
+  const {state,repository,isDemo}=useAttention();
   const p=state.products.find(p=>p.id===productId);
   const [step,setStep]=useState<'amount'|'review'>('amount'),[amount,setAmount]=useState(''),[error,setError]=useState('');
   const busy=useRef(false);
@@ -138,6 +138,7 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
     busy.current=true;
     setError('');
     try{
+      if(isDemo){await repository.simulateBid(p.id,value);onClose();return;}
       const response=await fetch('/api/attention/checkout',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -155,9 +156,9 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
       busy.current=false;
     }
   }
-  return <MarketDialog returnFocusId={p?`bid-${p.id}`:undefined} open={!!p} onClose={onClose} title={step==='review'?'Review your bid':'Move into the spotlight.'} description={`Bid for ${p?.name||'a product'}`}>
+  return <MarketDialog className="fixed-bid-dialog" returnFocusId={p?`bid-${p.id}`:undefined} open={!!p} onClose={onClose} title={step==='review'?'Review your bid':'Move into the spotlight.'} description={`Bid for ${p?.name||'a product'}`}>
     {p&&<>
-      <div className="bid-product"><ProductLogo product={p} small/><div><strong>{p.name}</strong><span>{p.category}</span></div><a className="btn btn-secondary" href={safeWebsite(p.websiteUrl)||undefined} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={14}/></a></div>
+      <div className="bid-dialog-layout"><section className="bid-dialog-summary" aria-label="Bid summary"><div className="bid-product"><ProductLogo product={p} small/><div><strong>{p.name}</strong><span>{p.category}</span></div><a className="btn btn-secondary" href={safeWebsite(p.websiteUrl)||undefined} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={14}/></a></div>
       <div className="bid-clear" aria-label="Current bid, your new bid, and required add-on">
         <div>
           <small>CURRENT BID</small>
@@ -172,8 +173,8 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
           <strong>{Number.isInteger(value)?`+${money(value)}`:`+${money(MIN_INITIAL_BID)}`}</strong>
         </div>
       </div>
-      <p className="bid-clear-note">Pay only the add-on through Dodo Payments checkout. Rankings update after payment is confirmed.</p>
-      <div className="bid-progress"><span className={step==='amount'?'active':''}>1. Amount</span><span className={step==='review'?'active':''}>2. Review</span><span className={step==='review'?'active':''}>3. Dodo checkout</span></div>
+      <p className="bid-clear-note">{isDemo?'Demo bid: updates this preview only. No payment is taken.':'Pay only the add-on through Dodo Payments checkout. Rankings update after payment is confirmed.'}</p>
+      </section><section className="bid-dialog-workspace" aria-label="Bid amount and review"><div className="bid-progress"><span className={step==='amount'?'active':''}>1. Amount</span><span className={step==='review'?'active':''}>2. Review</span><span className={step==='review'?'active':''}>3. {isDemo?'Demo bid':'Dodo checkout'}</span></div>
       {step==='amount'
         ? <form onSubmit={e=>{e.preventDefault();advance();}} noValidate>
             <div className="bid-targets">
@@ -194,16 +195,16 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
               <div><dt>Your add-on</dt><dd>{money(value)}</dd></div>
               <div><dt>New bid</dt><dd>{money(nextBid)} <small>new cumulative total</small></dd></div>
               <div><dt>Projected position</dt><dd>#{rank||'—'}</dd></div>
-              <div className="receipt-total"><dt>Dodo Payments</dt><dd>{money(value)}</dd></div>
+              <div className="receipt-total"><dt>{isDemo?'Simulated amount':'Dodo Payments'}</dt><dd>{money(value)}</dd></div>
             </dl>
-            <div className="demo-payment"><CheckCircle2/><div><strong>Dodo Payments</strong><p>You will be redirected to Dodo Payments to pay the add-on only. Returning to CollabCy does not apply the bid by itself.</p></div></div>
+            <div className="demo-payment"><CheckCircle2/><div><strong>{isDemo?'Demo simulation':'Dodo Payments'}</strong><p>{isDemo?'Apply this bid locally to test ranking changes. No checkout or charge.':'You will be redirected to Dodo Payments to pay the add-on only. Returning to CollabCy does not apply the bid by itself.'}</p></div></div>
             {error&&<p className="attention-error" role="alert">{error}</p>}
             <div className="attention-dialog-actions">
               <Button variant="secondary" onClick={()=>setStep('amount')}>Edit bid</Button>
-              <Button onClick={()=>void startCheckout()}>Pay with Dodo<ArrowRight size={16}/></Button>
+              <Button onClick={()=>void startCheckout()}>{isDemo?'Apply demo bid':'Pay with Dodo'}<ArrowRight size={16}/></Button>
             </div>
           </>}
-      <DemoNote>Bid increases use Dodo Payments checkout. The bid is applied only after Dodo Payments confirms payment. Returning from checkout does not apply the bid by itself.</DemoNote>
+      <DemoNote>{isDemo?'Demo changes last until you reload this page. No real payment or database write occurs.':'Bid increases use Dodo Payments checkout. The bid is applied only after Dodo Payments confirms payment. Returning from checkout does not apply the bid by itself.'}</DemoNote></section></div>
     </>}
   </MarketDialog>;
 }

@@ -18,7 +18,7 @@ const faq=[
 export function Help(){
   const [q,setQ]=useState('');
   const items=faq.filter(([a,b])=>(a+' '+b).toLowerCase().includes(q.toLowerCase()));
-  return <><PublicHeader/><main className="public-container public-section help-public">
+  return <><PublicHeader/><main className="public-container public-section help-public resource-help"><div className="resource-mark" aria-hidden="true"><MessageSquare size={25}/></div>
     <PageTitle eyebrow="A LITTLE GUIDANCE GOES A LONG WAY" title="How can we help" description="Clear answers for the Attention Marketplace."/>
     <div className="help-search"><SearchBox value={q} onChange={setQ} placeholder="Search questions about bids, listings, and payments…"/></div>
     <div className="help-categories">
@@ -30,13 +30,12 @@ export function Help(){
       <Accordion type="single" collapsible>{items.map(([a,b],i)=><AccordionItem key={a} value={`${i}`}><AccordionTrigger>{a}</AccordionTrigger><AccordionContent>{b}</AccordionContent></AccordionItem>)}</Accordion>
       {!items.length&&<Empty title="No matching answers." description="Try a shorter keyword, such as bids or listings."/>}
     </section>
-    <section className="panel" id="trust"><h2>Built around clear expectations.</h2><p>The Attention Marketplace ranks products by paid bids. There is no separate listing fee. Returning from checkout does not apply a bid by itself.</p><DemoNote>Attention Marketplace bids use Dodo Payments checkout. Collaboration payouts are not part of CollabCy.</DemoNote></section>
     <section className="panel" id="contact"><h2>Contact CollabCy</h2><p>Email <a href="mailto:admin@collabcy.app">admin@collabcy.app</a> for privacy questions, data deletion requests, or to report a marketplace or content concern.</p></section>
   </main><PublicFooter/></>;
 }
 
 export function Legal({kind}:{kind:'privacy'|'terms'}){
-  return <><PublicHeader/><main className="public-container public-section legal">
+  return <><PublicHeader/><main className="public-container public-section legal resource-sheet"><div className="resource-mark" aria-hidden="true"><ShieldCheck size={25}/></div>
     <span className="eyebrow">{kind==='privacy'?'PRIVACY POLICY':'TERMS OF SERVICE'}</span>
     <h1>{kind==='privacy'?'How CollabCy uses your information.':'A few things to know.'}</h1>
     {kind==='privacy'?<PrivacyCopy/>:<TermsCopy/>}
@@ -84,7 +83,7 @@ function TermsCopy(){
 }
 
 export function DataDeletion(){
-  return <><PublicHeader/><main className="public-container public-section legal">
+  return <><PublicHeader/><main className="public-container public-section legal resource-sheet"><div className="resource-mark" aria-hidden="true"><ShieldCheck size={25}/></div>
     <span className="eyebrow">DATA DELETION</span>
     <h1>Data Deletion</h1>
     <p className="lead">You can request deletion of personal data associated with CollabCy.</p>

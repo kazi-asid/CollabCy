@@ -1,8 +1,8 @@
 'use client';
-import {useEffect,useRef,useState,type CSSProperties} from 'react';
+import {useEffect,useLayoutEffect,useRef,useState,type CSSProperties} from 'react';
 import {useSearchParams} from 'next/navigation';
 import Link from '../ui/app-link';
-import {ArrowUpRight,ArrowRight,Check,Trophy,Layers,TrendingUp,Users,ChevronRight,Search,Heart,BarChart3,Crown,Sparkles,Globe as GlobeIcon,ShieldCheck as ShieldIcon} from 'lucide-react';
+import {ArrowUpRight,ArrowRight,ArrowLeft,Check,Trophy,Layers,TrendingUp,Users,ChevronRight,Search,Heart,BarChart3,Crown,Sparkles,Globe as GlobeIcon,ShieldCheck as ShieldIcon} from 'lucide-react';
 import {PublicHeader,PublicFooter} from '../ui/public';
 import {Button,SearchBox,Empty,DemoNote,Modal} from '../ui/shared';
 import {BrandProducts} from './listing';
@@ -28,6 +28,8 @@ export function AttentionMarketplace({view='discover'}:{view?:'discover'|'listin
   const paidReturn=params.get('paid')==='1';
   const promote=usePromote();
   const [filters,setFilters]=useState<MarketplaceFilters>({query:'',category:'All',time:'all'});
+  const [pagination,setPagination]=useState({key:'',page:1});
+  const leaderboardHeading=useRef<HTMLHeadingElement>(null);
   const openWebsite=useWebsiteVisit();
   const [bid,setBid]=useState<string|null>(null);
   const [allActivity,setAllActivity]=useState(false);
@@ -39,6 +41,15 @@ export function AttentionMarketplace({view='discover'}:{view?:'discover'|'listin
   const loading=repository.getStatus()==='loading';
   const leader=ranked[0];
   const regular=filtered.filter(product=>product.id!==leader?.id);
+  const filterKey=JSON.stringify(filters);
+  const pageCount=Math.max(1,Math.ceil(regular.length/5));
+  const page=Math.min(pagination.key===filterKey?pagination.page:1,pageCount);
+  const visibleProducts=regular.slice((page-1)*5,page*5);
+  function changePage(next:number){
+    setPagination({key:filterKey,page:Math.max(1,Math.min(next,pageCount))});
+    leaderboardHeading.current?.focus({preventScroll:true});
+    leaderboardHeading.current?.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  }
   return <>
     <PublicHeader/>
     <main className={`attention-page attention-editorial spotlight-page ${view==='listings'?'spotlight-listings':''}`}><div className="audience-dock public-container"><AudiencePulse/></div>
@@ -50,6 +61,7 @@ export function AttentionMarketplace({view='discover'}:{view?:'discover'|'listin
           <div className="attention-hero-grid">
             <div className="editorial-hero-copy">
               <div className="attention-eyebrow"><LiveBadge/><span>BRANDS ARE COMPETING FOR ATTENTION</span></div>
+              <section className="mobile-claim-strip" aria-label="Claim the number one spot"><span className="mobile-claim-rank" aria-hidden="true">#1</span><div className="mobile-claim-copy"><small>{leader?'Claim the top spot':'Start the leaderboard'}</small><strong>{money(leader?leader.currentBid+1:MIN_INITIAL_BID)}<span> to lead</span></strong></div><Button onClick={()=>leader?setBid(leader.id):promote()}>{leader?'Place bid':'List product'}<ArrowUpRight size={14}/></Button></section>
               <h1>Make your brand<span>standout</span></h1>
               <p>Big ideas deserve to be seen. Meet remarkable products, discover your next favorite, and put your brand in the spotlight.</p>
               <div className="hero-actions">
@@ -69,32 +81,31 @@ export function AttentionMarketplace({view='discover'}:{view?:'discover'|'listin
       <section className="public-container attention-market" id="products" aria-label="Product marketplace">
         <div className="attention-market-grid">
           <div className="attention-board">
-            <div className="attention-board-head">
-              <div>
-                {view==='listings'?<nav className="listing-breadcrumb" aria-label="Breadcrumb"><Link href="/">Discover</Link><span>/</span><span aria-current="page">Listings</span></nav>:<span className="editorial-kicker">THE BRAND SPOTLIGHT</span>}
-                {view==='listings'?<h1>All listings<span className="editorial-period">.</span></h1>:<h2>Who’s in the spotlight<span className="editorial-period">.</span></h2>}
-                <p>{view==='listings'?`${ranked.length} ${ranked.length===1?'product':'products'} on the board. Your next discovery starts here.`:'Independent brands. Ambitious ideas. Your next discovery.'}</p>
+            <div className="attention-board-head compact-board-head">
+              {view==='listings'?<h1>All listings<span className="editorial-period">.</span></h1>:<h2>Who’s in the spotlight<span className="editorial-period">.</span></h2>}
+              <div className="attention-time" data-period={filters.time} role="group" aria-label="Activity period"><span className="time-slide-indicator" aria-hidden="true"/>
+                <button type="button" aria-pressed={filters.time==='all'} onClick={()=>setFilters(v=>({...v,time:'all'}))}>All time</button>
+                <button type="button" aria-label="Last 24 hours" aria-pressed={filters.time==='24h'} onClick={()=>setFilters(v=>({...v,time:'24h'}))}>24h</button>
               </div>
-              <Button className={`spotlight-button${view==='listings'?' listing-spotlight-cta':''}`} onClick={()=>setSpotlight(true)}>{view==='listings'&&<Crown className="listing-cta-crown" size={16}/>}<span>Spotlight your brand</span><ArrowUpRight size={17}/></Button>
             </div>
             <div className="attention-toolbar">
-              <div className="attention-controls">
-                <div className="attention-time" role="group" aria-label="Activity period">
-                  <button aria-pressed={filters.time==='all'} onClick={()=>setFilters(v=>({...v,time:'all'}))}>All time</button>
-                  <button aria-pressed={filters.time==='24h'} onClick={()=>setFilters(v=>({...v,time:'24h'}))}>Last 24 hours</button>
-                </div>
+              <div className="attention-controls board-search-controls">
                 <div id="market-search"><SearchBox placeholder="Search products, brands, or categories…" value={filters.query} onChange={query=>setFilters(v=>({...v,query}))}/></div>
               </div>
               <CategoryChips value={filters.category} onChange={setCategory}/>
             </div>
             {view==='listings'&&leader&&filtered.some(product=>product.id===leader.id)&&<CrownJewel product={leader} loading={loading} onBid={setBid}/>}
             {filtered.length
-              ? <><div className="regular-board-heading"><h3>Regular leaderboard</h3><span>Ranked independently of the Crown Jewel</span></div><div className={view==='listings'?'listing-directory':'attention-products'} role="list" aria-label="Regular leaderboard">
-                  {regular.map(product=>{
+              ? <><div className="regular-board-heading"><h3 ref={leaderboardHeading} tabIndex={-1} style={{scrollMarginTop:100}}>Regular leaderboard</h3><span>Ranked independently of the Crown Jewel</span></div><div className={view==='listings'?'listing-directory':'attention-products'} role="list" aria-label="Regular leaderboard">
+                  {visibleProducts.map(product=>{
                     const rank=marketplacePlacement(ranked,product.id).position;
                     return view==='listings'?<ListingRow key={product.id} product={product} rank={rank} onVisit={()=>openWebsite(product)} onBid={()=>setBid(product.id)}/>:<LeaderboardRow key={product.id} product={product} rank={rank} onVisit={()=>openWebsite(product)} onBid={()=>setBid(product.id)}/>;
                   })}
-                </div>{!regular.length&&<p className="regular-board-note">No regular listings match this view. The featured Crown Jewel has its own place above.</p>}</>
+                </div>{pageCount>1&&<nav className="leaderboard-pagination" aria-label="Leaderboard pages">
+                  <button type="button" className="leaderboard-page-button page-previous" disabled={page===1} onClick={()=>changePage(page-1)}><span className="page-button-icon"><ArrowLeft size={17}/></span><span>Previous</span></button>
+                  <div className="leaderboard-page-info" role="status" aria-live="polite" aria-atomic="true"><div className="leaderboard-page-count"><span>PAGE</span><strong key={page}>{String(page).padStart(2,'0')}</strong><span>/ {String(pageCount).padStart(2,'0')}</span></div><span className="leaderboard-page-range">{(page-1)*5+1}–{Math.min(page*5,regular.length)} of {regular.length} brands</span><span className="leaderboard-page-track" aria-hidden="true"><i style={{width:`${100/pageCount}%`,transform:`translateX(${(page-1)*100}%)`}}/></span></div>
+                  <button type="button" className="leaderboard-page-button page-next" disabled={page===pageCount} onClick={()=>changePage(page+1)}><span>Next</span><span className="page-button-icon"><ArrowRight size={17}/></span></button>
+                </nav>}{!regular.length&&<p className="regular-board-note">No regular listings match this view. The featured Crown Jewel has its own place above.</p>}</>
               : loading
                 ? view==='listings'?<div className="listing-loading" role="status" aria-label="Loading listings">{[0,1,2].map(i=><div className="listing-skeleton" key={i}><span/><div><b/><i/></div><em/></div>)}</div>:null
                 : !ranked.length
@@ -270,7 +281,7 @@ function ListingsEmpty({onList}:{onList:()=>void}){
 }
 
 export function ListingRow({product,rank,onVisit,onBid}:{product:Product;rank:number;onVisit:()=>void;onBid:()=>void}){
-  return <article className={`listing-row${rank===1?' listing-row-leader':''}`} role="listitem" style={{animationDelay:`${Math.min(rank-1,8)*55}ms`}}>
+  return <article className={`listing-row listing-position-${rank}${rank===1?' listing-row-leader':''}`} role="listitem" style={{animationDelay:`${Math.min(rank-1,8)*55}ms`}}>
     <BrandLink brandId={product.id} className="brand-card-link" href={`/discover/product/${product.slug}`} aria-label={`Open ${product.name} details`}/><span className="listing-rank" aria-label={`Regular leaderboard rank ${rank}`}>#{rank}</span>
     <BrandLink brandId={product.id} className="listing-logo-link" href={`/discover/product/${product.slug}`} aria-label={`View ${product.name}`}><ProductLogo product={product}/></BrandLink>
     <div className="listing-story"><div className="listing-story-title"><BrandLink brandId={product.id} href={`/discover/product/${product.slug}`}>{product.name}</BrandLink>{rank===1&&<span className="listing-leader-badge"><Sparkles size={10}/> IN THE SPOTLIGHT</span>}<span className="listing-category">{product.category}</span></div><p>{product.description}</p><span className="listing-host">{websiteHost(product.websiteUrl)}</span><BrandPageClicks product={product}/></div>
@@ -283,14 +294,26 @@ function BrandPageClicks({product}:{product:Product}){
 }
 
 export function LeaderboardRow({product,rank,onVisit,onBid}:{product:Product;rank:number;onVisit:()=>void;onBid:()=>void}){
-  return <article className={`attention-product brand-glass-card ${rank===1?'is-leader':''}`} role="listitem" style={{animationDelay:`${Math.min(rank,8)*65}ms`}}>
+  const row=useRef<HTMLElement>(null);
+  const previous=useRef<{rank:number;top:number}|null>(null);
+  useLayoutEffect(()=>{
+    const element=row.current;
+    if(!element)return;
+    const top=element.offsetTop;
+    const before=previous.current;
+    previous.current={rank,top};
+    if(before&&before.rank!==rank&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      const animation=element.animate([{translate:`0 ${before.top-top}px`},{translate:'0 0'}],{duration:420,easing:'cubic-bezier(.22,1,.36,1)'});
+      return()=>animation.cancel();
+    }
+  },[rank]);
+  return <article ref={row} className={`attention-product brand-glass-card refined-brand-card ${rank===1?'is-leader':''}`} role="listitem">
     <BrandLink brandId={product.id} className="brand-card-link" href={`/discover/product/${product.slug}`} aria-label={`Open ${product.name} details`}/>
-    <span className={`product-rank rank-${rank}`} aria-label={`Regular leaderboard rank ${rank}`}><small>#</small>{rank}</span><ProductLogo product={product}/>
-    <div className="product-story"><div className="product-story-top"><BrandLink brandId={product.id} href={`/discover/product/${product.slug}`}>{product.name}</BrandLink><span>{product.category}</span></div><p>{product.description}</p><BrandPageClicks product={product}/></div>
-    <div className="brand-card-side"><div className="product-list-stat bid-stat"><strong>{money(product.currentBid)}</strong><small>Current bid</small></div><div className="brand-card-actions"><Button className="bid-cta" id={`bid-${product.id}`} onClick={onBid} aria-label={`Place a bid for ${product.name}`}>Bid <TrendingUp size={13}/></Button><button className="product-visit" type="button" id={`visit-${product.id}`} onClick={onVisit} aria-label={`Visit ${product.name}`}>Visit <ArrowUpRight size={13}/></button><ShareListing product={product}/></div></div>
+    <span className={`product-rank rank-${rank}`} aria-label={`Regular leaderboard rank ${rank}`}><span key={rank} className="rank-value"><small>#</small>{rank}</span></span><ProductLogo product={product}/>
+    <div className="product-story"><div className="product-story-top"><BrandLink brandId={product.id} href={`/discover/product/${product.slug}`}>{product.name}</BrandLink><span>{product.category}</span></div><span className="refined-brand-domain">{websiteHost(product.websiteUrl)}</span><p>{product.description}</p><div className="refined-brand-meta"><BrandPageClicks product={product}/><span className="refined-last-bid">Last bid · {timeAgo(product.bids[0]?.createdAt||product.listingStartsAt)}</span></div></div>
+    <div className="brand-card-side"><div className="product-list-stat bid-stat"><strong key={product.currentBid}>{money(product.currentBid)}</strong><small>Total bid</small></div><div className="brand-card-actions"><Button className="bid-cta" id={`bid-${product.id}`} onClick={onBid} aria-label={`Increase bid for ${product.name}`}>Increase bid <TrendingUp size={13}/></Button><button className="product-visit" type="button" id={`visit-${product.id}`} onClick={onVisit} aria-label={`Visit ${product.name}`}>Visit <ArrowUpRight size={13}/></button><ShareListing product={product}/></div></div>
   </article>;
 }
-
 export function AttentionProduct({slug}:{slug:string}){
   const {state,repository}=useAttention();
   const params=useSearchParams();
@@ -317,18 +340,18 @@ export function AttentionProduct({slug}:{slug:string}){
     <PublicHeader/>
     <main className="public-container attention-detail brand-profile-page" style={{'--brand-accent':p.color} as CSSProperties}>
       <div className="audience-dock"><AudiencePulse/></div>
-      <Breadcrumb name={p.name}/>
+
       {paidReturn&&<div className="attention-success" role="status"><h3>Checkout complete. Your bid is confirming.</h3><p>Returning from Dodo does not apply the bid by itself. Rankings update after payment is confirmed.</p></div>}
-      <article className="brand-profile-sheet">
-        <header className="profile-intro">
-          <div className="profile-topline"><span><Sparkles size={14}/> THE BRAND SPOTLIGHT</span><span className="profile-status"><i/>{isActive(p)?'Active listing':'Inactive listing'}</span></div>
+      <div className="profile-moving-backdrop" aria-hidden="true"><i className="backdrop-ring ring-a"/><i className="backdrop-ring ring-b"/><i className="backdrop-glow"/><Sparkles className="backdrop-spark spark-left" size={32}/><Sparkles className="backdrop-spark spark-right" size={25}/></div><article className="brand-profile-sheet">
+        <header className="profile-intro"><div className="profile-art" aria-hidden="true"><span className="profile-art-orbit"/><span className="profile-art-orbit orbit-offset"/><span className="profile-art-monogram">{p.name.slice(0,1).toUpperCase()}</span><Sparkles className="profile-art-star" size={28}/><span className="profile-art-caption">INDEPENDENT BRAND · BIG POSSIBILITIES</span></div>
+          <div className="profile-topline"><div className="profile-navigation"><Link href="/#products" className="profile-back" aria-label="Back to marketplace" title="Back to marketplace"><ArrowLeft size={19}/></Link><span><Sparkles size={14}/> THE BRAND SPOTLIGHT</span></div><span className="profile-status"><i/>{isActive(p)?'Active listing':'Inactive listing'}</span></div>
           <div className="profile-identity"><ProductLogo product={p}/><div><span className="profile-maker">By {p.brandName}</span><h1>{p.name}</h1><div className="attention-tags"><span>{p.category}</span>{p.tags.map(tag=><span key={tag}>{tag}</span>)}</div></div></div>
           <p className="profile-description">{p.description}</p>
           <div className="profile-action-row">
             <Button id={`visit-${p.id}`} onClick={()=>openWebsite(p)}>Visit website <ArrowUpRight size={18}/></Button>
             <Button variant="secondary" id={`bid-${p.id}`} disabled={!isActive(p)} onClick={()=>setBid(p.id)}>Place a bid <TrendingUp size={16}/></Button>
             <ShareListing product={p}/>
-            <span className="profile-domain"><GlobeIcon size={14}/>{websiteHost(p.websiteUrl)}</span>
+            <button type="button" className="profile-domain" onClick={()=>openWebsite(p)} aria-label={`Visit ${p.name} website`}><GlobeIcon size={14}/>{websiteHost(p.websiteUrl)}<ArrowUpRight size={13}/></button>
           </div>
         </header>
         <div className="profile-stats"><ProductMetrics product={p}/></div>
@@ -342,7 +365,7 @@ export function AttentionProduct({slug}:{slug:string}){
             </section>
           </div>
           <aside className="profile-sidebar">
-            <div className="profile-rank-note"><Crown size={22}/><div><strong>{isLeader?'#1 · The Crown Jewel':'In the spotlight'}</strong><p>{isLeader?'Leading the board. Setting the pace.':'Good ideas deserve to be seen.'}</p></div></div>
+            <div className="profile-rank-note"><span className="profile-rank-emblem"><ProductLogo product={p} small/><span className="profile-rank-crown"><Crown size={12}/></span></span><div><strong>{isLeader?'#1 · The Crown Jewel':'In the spotlight'}</strong><p>{isLeader?'Leading the board. Setting the pace.':'Good ideas deserve to be seen.'}</p></div></div>
             <section className="profile-section">
               <span className="profile-section-label">LATEST ACTIVITY</span>
               <h2>What’s happening.</h2>
