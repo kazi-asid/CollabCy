@@ -17,9 +17,11 @@ const counter=createSiteVisitCounter({visitId,request:async(method,id)=>{
   if(!response.ok)throw new Error('Site visits unavailable');
   return response.json();
 }});
+const readOnlyLocalMode=import.meta.env.NEXT_PUBLIC_COLLABCY_LOCAL_READ_ONLY_MODE==='true';
 
 export function SiteVisitTracker(){
   useEffect(()=>{
+    if(readOnlyLocalMode)return;
     const refresh=()=>{if(document.visibilityState==='visible')void counter.refresh();};
     refresh();const timer=setInterval(refresh,30000);
     document.addEventListener('visibilitychange',refresh);

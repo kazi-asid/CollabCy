@@ -3,12 +3,13 @@ import type { ActivityEvent, Bid, Product } from "@/app/attention/model";
 import { isActive, safeWebsite } from "@/app/attention/model";
 import { isAttentionProductId, validateAttentionIncrement, validateAttentionListing } from "@/app/attention/validation";
 
-function publicEnv(name: "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_ANON_KEY") {
+function publicEnv(name: "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_ANON_KEY" | "NEXT_PUBLIC_COLLABCY_LOCAL_READ_ONLY_MODE") {
   return import.meta.env[name] || (typeof process !== "undefined" ? process.env[name] : undefined);
 }
 
 const url = publicEnv("NEXT_PUBLIC_SUPABASE_URL");
 const anonKey = publicEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+export const readOnlyLocalMode = publicEnv("NEXT_PUBLIC_COLLABCY_LOCAL_READ_ONLY_MODE") === "true";
 
 let client: SupabaseClient | null | undefined;
 
@@ -221,6 +222,7 @@ function isAttentionProductRow(value: unknown): value is AttentionProductRow {
 }
 
 export async function getAttentionSessionUser(): Promise<{ id: string } | null> {
+  if (readOnlyLocalMode) return null;
   const supabase = getSupabase();
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getSession();
@@ -234,8 +236,29 @@ export async function loadAttentionMarketplace(): Promise<{
   skipped?: boolean;
   error?: string;
 }> {
+  if (readOnlyLocalMode) {
+    try {
+      const response = await fetch("/api/attention/read-only", { method: "GET", cache: "no-store" });
+      const payload = await response.json().catch(() => null) as { products?: unknown; activity?: unknown; error?: unknown } | null;
+      if (!response.ok || !payload || !Array.isArray(payload.products) || !Array.isArray(payload.activity)) {
+        return { products: [], activity: [], error: typeof payload?.error === "string" ? payload.error : "Could not load the read-only marketplace." };
+      }
+      return { products: payload.products as Product[], activity: payload.activity as ActivityEvent[] };
+    } catch {
+      return { products: [], activity: [], error: "Could not load the read-only marketplace." };
+    }
+  }
   const supabase = getSupabase();
   if (!supabase) return { products: [], activity: [], skipped: true };
+  return loadAttentionMarketplaceWithClient(supabase);
+}
+
+export async function loadAttentionMarketplaceWithClient(supabase: SupabaseClient): Promise<{
+  products: Product[];
+  activity: ActivityEvent[];
+  skipped?: boolean;
+  error?: string;
+}> {
   const { data: productData, error: productError } = await supabase
     .from("attention_products_public")
     .select(ATTENTION_PRODUCT_COLUMNS);
@@ -294,6 +317,7 @@ export async function placeAttentionBid(productId: string, increment: number): P
 }
 
 export async function recordAttentionVisit(productId: string): Promise<{ clickCount?: number; error?: string; skipped?: boolean }> {
+  if (readOnlyLocalMode) return { error: "Visit recording is disabled in the read-only local preview." };
   const supabase = getSupabase();
   if (!supabase) return { skipped: true };
   if (!isAttentionProductId(productId)) return { error: "Product not found." };
@@ -315,6 +339,7 @@ export async function publishAttentionListing(input: AttentionListingWrite): Pro
 }
 
 export function subscribeToAttentionMarketplace(onChange: () => void): () => void {
+  if (readOnlyLocalMode) return () => {};
   const supabase = getSupabase();
   if (!supabase) return () => {};
   const channel = supabase
