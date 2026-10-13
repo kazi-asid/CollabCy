@@ -62,7 +62,7 @@ try{
   await retry.refresh();assert.equal(retry.getSnapshot().status,'unavailable');assert.equal(retry.getSnapshot().total,null);
   time+=30000;await retry.refresh();assert.deepEqual(retryIds,['stable-id','stable-id']);assert.equal(retry.getSnapshot().total,'0');
 
-  const audience=read('app/attention/audience.tsx'),pages=read('app/attention/pages.tsx'),share=read('app/attention/share.tsx'),logos=read('app/attention/components.tsx');
+  const audience=read('app/attention/audience.tsx'),pages=read('app/attention/pages.tsx'),share=read('app/attention/share.tsx'),logos=read('app/attention/components.tsx'),styles=read('app/collabcy.css');
   const markup=audience.slice(audience.indexOf('return <div className="audience-pulse"'));
   assert.ok(markup.indexOf('audience-pulse-live')<markup.indexOf('audience-pulse-visits'));
   assert.ok(markup.indexOf('audience-pulse-visits')<markup.indexOf('<ActivityTicker'));
@@ -70,6 +70,14 @@ try{
   assert.match(pages,/regular=filtered.filter\(product=>product.id!==leader\?\.id\)/);
   assert.match(pages,/Crown Jewel featured category/);assert.match(pages,/<ProductLogo product=\{product\}\/>/);
   assert.match(logos,/onError=\{\(\)=>setFailed\(source\)\}/);
+  assert.match(logos,/className="fixed-bid-dialog"/);
+  assert.match(logos,/className="bid-dialog-layout"/);
+  assert.match(logos,/fetch\('\/api\/attention\/checkout'/,'Bid dialog must retain the production checkout handler');
+  assert.doesNotMatch(logos,/simulateBid/,'Bid dialog must not introduce simulated bidding');
+  assert.match(styles,/@media\(max-width:640px\)[\s\S]*\.attention-dialog\.fixed-bid-dialog\{[^}]*100vw[^}]*safe-area-inset-left[^}]*safe-area-inset-right/);
+  assert.match(styles,/\.attention-dialog\.fixed-bid-dialog\{[^}]*left:50%!important[^}]*top:50%!important[^}]*transform:translate\(-50%,-50%\)!important/);
+  assert.match(styles,/@media\(max-width:640px\)[\s\S]*\.fixed-bid-dialog \.bid-dialog-layout\{[^}]*grid-template-columns:minmax\(0,1fr\)[^}]*overflow-x:hidden[^}]*overflow-y:auto/);
+  assert.match(styles,/\.fixed-bid-dialog \.attention-dialog-actions \.btn\{[^}]*min-width:0/);
   assert.match(share,/paintCard\(frame,product,rank\)/);assert.match(share,/context.drawImage\(frame,0,0\)/);assert.match(share,/canvas.toBlob/);
   assert.match(share,/safeWebsite\(product.websiteUrl\)/);assert.match(share,/\/discover\/product\//);
   const sql=read('supabase/migrations/20261011000000_collabcy_site_visits.sql');
