@@ -75,7 +75,8 @@ try{
   assert.match(logos,/fetch\('\/api\/attention\/checkout'/,'Bid dialog must retain the production checkout handler');
   assert.doesNotMatch(logos,/simulateBid/,'Bid dialog must not introduce simulated bidding');
   assert.match(styles,/@media\(max-width:640px\)[\s\S]*\.attention-dialog\.fixed-bid-dialog\{[^}]*100vw[^}]*safe-area-inset-left[^}]*safe-area-inset-right/);
-  assert.match(styles,/\.attention-dialog\.fixed-bid-dialog\{[^}]*left:50%!important[^}]*top:50%!important[^}]*transform:translate\(-50%,-50%\)!important/);
+  assert.match(styles,/\.attention-dialog\.fixed-bid-dialog\{[^}]*left:50%!important[^}]*top:50%!important[^}]*translate:-50% -50%!important[^}]*transform:none!important/);
+  assert.doesNotMatch(styles,/\.attention-dialog\.fixed-bid-dialog\{[^}]*transform:translate\(-50%,-50%\)/,'Bid dialog must not stack transform centering on the shared translate utility');
   assert.match(styles,/@media\(max-width:640px\)[\s\S]*\.fixed-bid-dialog \.bid-dialog-layout\{[^}]*grid-template-columns:minmax\(0,1fr\)[^}]*overflow-x:hidden[^}]*overflow-y:auto/);
   assert.match(styles,/\.fixed-bid-dialog \.attention-dialog-actions \.btn\{[^}]*min-width:0/);
   assert.match(share,/paintCard\(frame,product,rank\)/);assert.match(share,/context.drawImage\(frame,0,0\)/);assert.match(share,/canvas.toBlob/);

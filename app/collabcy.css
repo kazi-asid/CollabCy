@@ -1693,7 +1693,7 @@ body .public-header.floating-header .nav-actions .navbar-cta { display:inline-fl
 }
 
 /* Fixed bid workspace: summary and checkout fit side by side. */
-.attention-dialog.fixed-bid-dialog{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;max-width:850px!important;width:calc(100% - 32px)!important;max-height:calc(100dvh - 32px);padding:24px!important;gap:6px!important;overflow:hidden;display:flex;flex-direction:column;border-radius:24px!important;background:linear-gradient(135deg,#fff,#fffafd)!important}
+.attention-dialog.fixed-bid-dialog{position:fixed!important;left:50%!important;top:50%!important;translate:-50% -50%!important;transform:none!important;max-width:850px!important;width:calc(100% - 32px)!important;max-height:calc(100dvh - 32px);padding:24px!important;gap:6px!important;overflow:hidden;display:flex;flex-direction:column;border-radius:24px!important;background:linear-gradient(135deg,#fff,#fffafd)!important}
 .fixed-bid-dialog [data-slot=dialog-title]{flex-shrink:0;font-size:23px;padding-right:30px}
 .fixed-bid-dialog [data-slot=dialog-description]{flex-shrink:0;margin-bottom:12px;font-size:12px}
 .fixed-bid-dialog .bid-dialog-layout{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:24px;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}

@@ -7,7 +7,9 @@
   },
   "scripts": {
     "install:ci": "node scripts/install-ci.mjs",
-    "dev": "node scripts/run-framework.mjs dev",
+    "dev": "node scripts/run-production-read-only.mjs",
+    "dev:safe": "node scripts/run-safe-local.mjs",
+    "dev:production-read-only": "node scripts/run-production-read-only.mjs",
     "build": "node scripts/run-framework.mjs build",
     "start": "node .output/server/index.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
