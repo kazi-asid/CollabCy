@@ -24,7 +24,7 @@ function previousBidForEvent(product:Product,event:ActivityEvent){
   return product.bids.find(bid=>bid.createdAt<event.createdAt)?.amount;
 }
 function VisitSpark({products}:{products:Product[]}){
-  const now=Date.now();
+  const [now]=useState(()=>Date.now());
   const days=7;
   const midnight=new Date(now);
   midnight.setHours(0,0,0,0);
@@ -88,9 +88,9 @@ export function ActivityList({events,limit=5}:{events:ActivityEvent[];limit?:num
   });
   return <ol className="attention-activity">{rows}{!rows.length&&<li className="activity-quiet"><span className="activity-quiet-mark"><TrendingUp size={18}/></span><strong>Quiet for now.</strong><small>New products and ranking changes will appear here.</small></li>}</ol>;
 }
-export function MarketDialog({open,onClose,title,description,children,returnFocusId}:{open:boolean;onClose:()=>void;title:string;description:string;children:ReactNode;returnFocusId?:string}){
+export function MarketDialog({open,onClose,title,description,children,returnFocusId,className=''}:{open:boolean;onClose:()=>void;title:string;description:string;children:ReactNode;returnFocusId?:string;className?:string}){
   const trigger=useRef<HTMLElement|null>(null);
-  return <Dialog open={open} onOpenChange={v=>!v&&onClose()}><DialogContent className="attention-dialog" onOpenAutoFocus={()=>{trigger.current=document.activeElement as HTMLElement;}} onCloseAutoFocus={e=>{const target=trigger.current?.isConnected?trigger.current:returnFocusId?document.getElementById(returnFocusId):null;if(target){e.preventDefault();target.focus();}}}><DialogTitle>{title}</DialogTitle><DialogDescription>{description}</DialogDescription>{children}</DialogContent></Dialog>;
+  return <Dialog open={open} onOpenChange={v=>!v&&onClose()}><DialogContent className={`attention-dialog ${className}`} onOpenAutoFocus={()=>{trigger.current=document.activeElement as HTMLElement;}} onCloseAutoFocus={e=>{const target=trigger.current?.isConnected?trigger.current:returnFocusId?document.getElementById(returnFocusId):null;if(target){e.preventDefault();target.focus();}}}><DialogTitle>{title}</DialogTitle><DialogDescription>{description}</DialogDescription>{children}</DialogContent></Dialog>;
 }
 export function VisitDialog({productId,onClose,onBid}:{productId:string|null;onClose:()=>void;onBid:(id:string)=>void}){
   const {state,repository}=useAttention();
@@ -110,11 +110,10 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
   const recommend=p?recommendedIncrementToLead(state.products,p.id):null;
   const rankNow=p?getRankedProducts(state.products).findIndex(item=>item.id===p.id)+1:0;
   useEffect(()=>{
-    setStep('amount');
-    setError('');
     busy.current=false;
     const suggested=initialIncrement&&initialIncrement>=MIN_INITIAL_BID?initialIncrement:MIN_INITIAL_BID;
-    setAmount(String(suggested));
+    const frame=window.requestAnimationFrame(()=>{setStep('amount');setError('');setAmount(String(suggested));});
+    return()=>window.cancelAnimationFrame(frame);
   },[productId,initialIncrement]);
   const value=Number(amount);
   const nextBid=p&&Number.isInteger(value)?p.currentBid+value:NaN;
@@ -155,9 +154,9 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
       busy.current=false;
     }
   }
-  return <MarketDialog returnFocusId={p?`bid-${p.id}`:undefined} open={!!p} onClose={onClose} title={step==='review'?'Review your bid':'Move into the spotlight.'} description={`Bid for ${p?.name||'a product'}`}>
+  return <MarketDialog className="fixed-bid-dialog" returnFocusId={p?`bid-${p.id}`:undefined} open={!!p} onClose={onClose} title={step==='review'?'Review your bid':'Move into the spotlight.'} description={`Bid for ${p?.name||'a product'}`}>
     {p&&<>
-      <div className="bid-product"><ProductLogo product={p} small/><div><strong>{p.name}</strong><span>{p.category}</span></div><a className="btn btn-secondary" href={safeWebsite(p.websiteUrl)||undefined} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={14}/></a></div>
+      <div className="bid-dialog-layout"><section className="bid-dialog-summary" aria-label="Bid summary"><div className="bid-product"><ProductLogo product={p} small/><div><strong>{p.name}</strong><span>{p.category}</span></div><a className="btn btn-secondary" href={safeWebsite(p.websiteUrl)||undefined} target="_blank" rel="noopener noreferrer">Visit website <ArrowUpRight size={14}/></a></div>
       <div className="bid-clear" aria-label="Current bid, your new bid, and required add-on">
         <div>
           <small>CURRENT BID</small>
@@ -173,7 +172,7 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
         </div>
       </div>
       <p className="bid-clear-note">Pay only the add-on through Dodo Payments checkout. Rankings update after payment is confirmed.</p>
-      <div className="bid-progress"><span className={step==='amount'?'active':''}>1. Amount</span><span className={step==='review'?'active':''}>2. Review</span><span className={step==='review'?'active':''}>3. Dodo checkout</span></div>
+      </section><section className="bid-dialog-workspace" aria-label="Bid amount and review"><div className="bid-progress"><span className={step==='amount'?'active':''}>1. Amount</span><span className={step==='review'?'active':''}>2. Review</span><span className={step==='review'?'active':''}>3. Dodo checkout</span></div>
       {step==='amount'
         ? <form onSubmit={e=>{e.preventDefault();advance();}} noValidate>
             <div className="bid-targets">
@@ -203,7 +202,7 @@ export function BidDialog({productId,onClose,initialIncrement}:{productId:string
               <Button onClick={()=>void startCheckout()}>Pay with Dodo<ArrowRight size={16}/></Button>
             </div>
           </>}
-      <DemoNote>Bid increases use Dodo Payments checkout. The bid is applied only after Dodo Payments confirms payment. Returning from checkout does not apply the bid by itself.</DemoNote>
+      <DemoNote>Bid increases use Dodo Payments checkout. The bid is applied only after Dodo Payments confirms payment. Returning from checkout does not apply the bid by itself.</DemoNote></section></div>
     </>}
   </MarketDialog>;
 }

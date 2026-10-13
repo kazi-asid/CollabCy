@@ -18,7 +18,7 @@ const faq=[
 export function Help(){
   const [q,setQ]=useState('');
   const items=faq.filter(([a,b])=>(a+' '+b).toLowerCase().includes(q.toLowerCase()));
-  return <><PublicHeader/><main className="public-container public-section help-public">
+  return <><PublicHeader/><main className="public-container public-section help-public resource-help"><div className="resource-mark" aria-hidden="true"><MessageSquare size={25}/></div>
     <PageTitle eyebrow="A LITTLE GUIDANCE GOES A LONG WAY" title="How can we help" description="Clear answers for the Attention Marketplace."/>
     <div className="help-search"><SearchBox value={q} onChange={setQ} placeholder="Search questions about bids, listings, and payments…"/></div>
     <div className="help-categories">
@@ -36,7 +36,7 @@ export function Help(){
 }
 
 export function Legal({kind}:{kind:'privacy'|'terms'}){
-  return <><PublicHeader/><main className="public-container public-section legal">
+  return <><PublicHeader/><main className="public-container public-section legal resource-sheet"><div className="resource-mark" aria-hidden="true"><ShieldCheck size={25}/></div>
     <span className="eyebrow">{kind==='privacy'?'PRIVACY POLICY':'TERMS OF SERVICE'}</span>
     <h1>{kind==='privacy'?'How CollabCy uses your information.':'A few things to know.'}</h1>
     {kind==='privacy'?<PrivacyCopy/>:<TermsCopy/>}
@@ -84,7 +84,7 @@ function TermsCopy(){
 }
 
 export function DataDeletion(){
-  return <><PublicHeader/><main className="public-container public-section legal">
+  return <><PublicHeader/><main className="public-container public-section legal resource-sheet"><div className="resource-mark" aria-hidden="true"><ShieldCheck size={25}/></div>
     <span className="eyebrow">DATA DELETION</span>
     <h1>Data Deletion</h1>
     <p className="lead">You can request deletion of personal data associated with CollabCy.</p>
