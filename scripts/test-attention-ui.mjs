@@ -79,6 +79,11 @@ try{
   assert.doesNotMatch(styles,/\.attention-dialog\.fixed-bid-dialog\{[^}]*transform:translate\(-50%,-50%\)/,'Bid dialog must not stack transform centering on the shared translate utility');
   assert.match(styles,/@media\(max-width:640px\)[\s\S]*\.fixed-bid-dialog \.bid-dialog-layout\{[^}]*grid-template-columns:minmax\(0,1fr\)[^}]*overflow-x:hidden[^}]*overflow-y:auto/);
   assert.match(styles,/\.fixed-bid-dialog \.attention-dialog-actions \.btn\{[^}]*min-width:0/);
+  assert.match(audience,/total visits<span className="audience-total-suffix"> in CollabCy<\/span>/,'Mobile may shorten the label without changing the global metric');
+  assert.match(styles,/@media\(max-width:700px\)[\s\S]*grid-template-columns:max-content minmax\(90px,max-content\) minmax\(0,1fr\)/,'Mobile audience bar must reserve readable space for all three items');
+  assert.match(styles,/@media\(max-width:700px\)[\s\S]*\.audience-pulse>\.audience-pulse-visits\{[^}]*min-width:90px[^}]*white-space:nowrap/,'Persisted visit total must remain visible on one line');
+  assert.match(styles,/@media\(max-width:700px\)[\s\S]*\.audience-total-suffix\{display:none\}/,'Mobile must use the compact total-visits label');
+  assert.match(styles,/@media\(max-width:700px\)[\s\S]*\.audience-dock \.audience-ticker\{[^}]*min-width:0[^}]*overflow:hidden/,'Latest activity must truncate without displacing the visit total');
   assert.match(share,/paintCard\(frame,product,rank\)/);assert.match(share,/context.drawImage\(frame,0,0\)/);assert.match(share,/canvas.toBlob/);
   assert.match(share,/safeWebsite\(product.websiteUrl\)/);assert.match(share,/\/discover\/product\//);
   const sql=read('supabase/migrations/20261011000000_collabcy_site_visits.sql');

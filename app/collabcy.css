@@ -1857,10 +1857,14 @@ html:has(.fixed-bid-dialog[data-state=open]){overflow:hidden;overscroll-behavior
 :is(.attention-page,.brand-profile-page) .audience-dock .audience-pulse-visits{gap:5px;white-space:nowrap}
 :is(.attention-page,.brand-profile-page) .audience-dock .audience-ticker{border-top:0;border-left:1px solid #ead7e0}
 @media(max-width:700px){
- :is(.attention-page,.brand-profile-page) .audience-dock .audience-pulse{width:100%;padding:11px 5px;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
- :is(.attention-page,.brand-profile-page) .audience-dock .audience-pulse>span{padding:0 7px}
- :is(.attention-page,.brand-profile-page) .audience-pulse-visits>strong{max-width:42px}
- :is(.attention-page,.brand-profile-page) .audience-total-label{font-size:9px}
+ :is(.attention-page,.brand-profile-page) .audience-dock .audience-pulse{width:100%;padding:11px 5px;grid-template-columns:max-content minmax(90px,max-content) minmax(0,1fr);gap:0}
+ :is(.attention-page,.brand-profile-page) .audience-dock .audience-pulse>span{padding:0 6px}
+ :is(.attention-page,.brand-profile-page) .audience-dock .audience-pulse>.audience-pulse-visits{display:flex;grid-column:auto;min-width:90px;padding-left:6px;border-left:1px solid #ead7e0;white-space:nowrap}
+ :is(.attention-page,.brand-profile-page) .audience-pulse-visits>strong{min-width:3ch;max-width:none;text-align:right}
+ :is(.attention-page,.brand-profile-page) .audience-total-label{font-size:10px}
+ :is(.attention-page,.brand-profile-page) .audience-total-suffix{display:none}
+ :is(.attention-page,.brand-profile-page) .audience-dock .audience-ticker{grid-column:auto;min-width:0;max-width:100%;padding-left:6px;border-top:0;border-left:1px solid #ead7e0;overflow:hidden}
+ :is(.attention-page,.brand-profile-page) .audience-ticker-copy,:is(.attention-page,.brand-profile-page) .audience-ticker-copy em{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 
 /* Mobile-only claim shortcut; desktop sidebar remains unchanged. */
