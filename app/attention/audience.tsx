@@ -109,7 +109,7 @@ export function AudiencePulse(){
   },[]);
   return <div className="audience-pulse" aria-label="Marketplace audience">
     <span className="audience-pulse-live"><i/><strong key={live}>{live===null?'—':live}</strong> live {online?'now':'here'}</span>
-    <span className="audience-pulse-visits" title={visits.trackingBeganAt?`Site visits since ${new Date(visits.trackingBeganAt).toLocaleDateString()}. One visit per browser-tab session.`:'Site-wide tracking must be enabled before a lifetime count is available.'}><ArrowUpRight size={14}/><strong>{visits.status==='ready'&&visits.total!==null?BigInt(visits.total).toLocaleString():'—'}</strong><span className="audience-total-label">total visits in CollabCy{visits.status!=='ready'&&<small>{visits.status==='loading'?'Loading…':'Currently unavailable'}</small>}</span></span>
+    <span className="audience-pulse-visits" title={visits.trackingBeganAt?`Site visits since ${new Date(visits.trackingBeganAt).toLocaleDateString()}. One visit per browser-tab session.`:'Site-wide tracking must be enabled before a lifetime count is available.'}><ArrowUpRight size={14}/><strong>{visits.status==='ready'&&visits.total!==null?BigInt(visits.total).toLocaleString():'—'}</strong><span className="audience-total-label">total visits<span className="audience-total-suffix"> in CollabCy</span>{visits.status!=='ready'&&<small>{visits.status==='loading'?'Loading…':'Currently unavailable'}</small>}</span></span>
     <ActivityTicker items={tickerItems}/>
   </div>;
 }

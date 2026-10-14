@@ -327,7 +327,7 @@ assert.match(model, /recommendedIncrementToLead/);
 assert.match(audience, /presence:\{key:tabId\}/);
 assert.doesNotMatch(audience, /visits in this browser|collabcy-preview-visits|setTotal\(1\)/);
 assert.match(audience, /useSiteVisits/);
-assert.match(audience, /total visits in CollabCy/);
+assert.match(audience, /total visits<span className="audience-total-suffix"> in CollabCy<\/span>/);
 assert.doesNotMatch(audience, /Live presence on this page/);
 assert.doesNotMatch(audience, /Page presence in this browser/);
 assert.match(pages, /Make your brand<span>standout<\/span>/);
