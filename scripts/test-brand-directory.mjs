@@ -13,13 +13,14 @@ assert.match(marketplace,/if\(path==='\/'\)return <AttentionMarketplace\/>/);
 assert.match(marketplace,/if\(path==='\/discover'\)\{router\.replace\('\/'\);return\}/);
 assert.doesNotMatch(marketplace,/Discover creators/);
 assert.doesNotMatch(marketplace,/Discover brands/);
-assert.doesNotMatch(marketplace,/path==='\/creators'/);
+assert.match(marketplace,/path==='\/creators'/);
+assert.match(marketplace,/CreatorDirectory/);
 assert.doesNotMatch(marketplace,/path==='\/brands'/);
 assert.doesNotMatch(marketplace,/CreatorDiscovery/);
 assert.doesNotMatch(marketplace,/BrandDiscovery/);
 
 const publicHeader=publicUi.slice(publicUi.indexOf('export function PublicHeader'),publicUi.indexOf('export function PublicFooter'));
-assert.doesNotMatch(publicHeader,/href="\/creators"/);
+assert.match(publicHeader,/href="\/creators"/);
 assert.doesNotMatch(publicHeader,/href="\/brands"/);
 assert.doesNotMatch(publicHeader,/href="\/login"/);
 
@@ -27,4 +28,4 @@ assert.match(collabCleanup,/drop view if exists public\.public_creators cascade/
 assert.match(collabCleanup,/drop view if exists public\.public_brands cascade/);
 assert.doesNotMatch(collabCleanup,/drop table if exists public\.attention_products/);
 
-console.log('PASS: brand/creator directories are removed from the public Attention Marketplace.');
+console.log('PASS: public Creator Directory is routed without restoring legacy brand discovery.');

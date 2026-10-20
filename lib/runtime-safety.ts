@@ -24,3 +24,12 @@ export function isAuthorizedReadOnlyLocalRequest(request: Request) {
     return false;
   }
 }
+
+/** New server-backed features must stay inert when localhost is deliberately
+ * pointed at the production read-only listing source.  The special local
+ * mode is for browsing existing public listings, never for creating drafts,
+ * profiles, or other remote records. */
+export function localIntegrationBlockedResponse(request: Request): Response | null {
+  if (!isAuthorizedReadOnlyLocalRequest(request)) return null;
+  return Response.json({ error: "This feature is unavailable in local read-only mode." }, { status: 403 });
+}

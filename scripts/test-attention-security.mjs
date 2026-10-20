@@ -341,7 +341,9 @@ assert.match(pages, /<ActivityList events=\{state\.activity\} limit=\{allActivit
 assert.match(collabCleanup, /drop table if exists public\.campaigns cascade/);
 assert.match(collabCleanup, /Does not drop Attention Marketplace/);
 assert.doesNotMatch(marketplace, /AdminWorkspace/);
-assert.doesNotMatch(marketplace, /path==='\/creators'/);
+assert.match(marketplace, /path==='\/creators'/);
+assert.match(marketplace, /path==='\/launches'/);
+assert.match(marketplace, /CreatorDashboard/);
 assert.doesNotMatch(marketplace, /href="\/login"/);
 assert.match(marketplace, /if\(path==='\/'\)return <AttentionMarketplace\/>/);
 assert.doesNotMatch(listing, /Ends /);

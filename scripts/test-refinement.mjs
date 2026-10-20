@@ -17,7 +17,7 @@ assert.match(marketplace,/BrandProducts creating/);
 const publicUi=read('app/ui/public.tsx');
 assert.doesNotMatch(publicUi,/I'm a creator/);
 assert.doesNotMatch(publicUi,/ComingSoon/);
-assert.match(publicUi,/Get Started/);
+assert.match(publicUi,/Spotlight your brand/);
 
 const wizard=read('app/attention/spotlight-wizard.tsx');
 assert.match(wizard,/Claim your spotlight/);

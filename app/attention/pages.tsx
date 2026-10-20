@@ -16,6 +16,7 @@ import {money} from '../data';
 import {useAttention} from './store';
 import {attentionCategories,getRankedProducts,getFilteredProducts,isActive,timeAgo,websiteHost,MIN_INITIAL_BID,type MarketplaceFilters,type Product} from './model';
 import {ProductLogo,LiveBadge,ActivityList,BidDialog,ProductMetrics} from './components';
+import {LaunchEventTeaser} from '../launch-creator-pages';
 
 export function usePromote(){
   const {go}=useStore();
@@ -78,6 +79,8 @@ export function AttentionMarketplace({view='discover'}:{view?:'discover'|'listin
           </div>
         </div>
       </section>}
+      {view==='discover'&&<MarketplaceIndex products={ranked} onBid={setBid}/>}
+      {view==='discover'&&<LaunchEventTeaser/>}
       <section className="public-container attention-market" id="products" aria-label="Product marketplace">
         <div className="attention-market-grid">
           <div className="attention-board">
@@ -156,6 +159,17 @@ export function AttentionMarketplace({view='discover'}:{view?:'discover'|'listin
 
     <BidDialog productId={bid} onClose={()=>setBid(null)}/>
   </>;
+}
+
+function MarketplaceIndex({products,onBid}:{products:Product[];onBid:(id:string)=>void}){
+  const featured=products[0];
+  return <section className="public-container marketplace-index" aria-labelledby="attention-index-title">
+    <div className="marketplace-index-heading"><span className="editorial-kicker">LIVE ATTENTION INDEX</span><h2 id="attention-index-title">What people are watching.</h2><p>Every position, bid, and listing below comes from the live Attention Marketplace.</p></div>
+    <div className="marketplace-index-grid">
+      <div className="index-ranks">{products.slice(0,3).map((product,index)=><article key={product.id}><span>0{index+1}</span><ProductLogo product={product} small/><div><strong>{product.name}</strong><small>{product.category}</small></div><b>{money(product.currentBid)}</b></article>)}{!products.length&&<p>No active listings yet.</p>}</div>
+      <article className="index-featured">{featured?<><div className="index-featured-art"><ProductLogo product={featured}/><span>FEATURED #1</span></div><div><span className="editorial-kicker">CROWN JEWEL</span><h3>{featured.name}</h3><p>{featured.description}</p><div className="index-featured-actions"><Link href={`/discover/product/${featured.slug}`}>View product <ArrowRight size={15}/></Link><Button onClick={()=>onBid(featured.id)}>Increase bid <TrendingUp size={14}/></Button></div></div></>:<><Crown/><h3>The first spotlight is waiting.</h3><p>List a real product to start the index.</p></>}</article>
+    </div>
+  </section>;
 }
 
 function CategoryChips({value,onChange}:{value:string;onChange:(category:string)=>void}){
